@@ -12,6 +12,8 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
           switch (methodCall.method) {
+            case 'enableTestSession':
+              return null;
             case 'checkSupport':
               return true;
             case 'getVerifiedPhoneNumber':
@@ -28,6 +30,10 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
+  });
+
+  test('enableTestSession', () async {
+    await expectLater(platform.enableTestSession('test-token'), completes);
   });
 
   test('checkSupport', () async {

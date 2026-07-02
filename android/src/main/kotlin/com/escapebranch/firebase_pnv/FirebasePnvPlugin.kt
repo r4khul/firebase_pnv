@@ -73,9 +73,38 @@ class FirebasePnvPlugin :
         result: Result
     ) {
         when (call.method) {
+            "enableTestSession" -> enableTestSession(call, result)
             "checkSupport" -> checkSupport(result)
             "getVerifiedPhoneNumber" -> getVerifiedPhoneNumber(result)
             else -> result.notImplemented()
+        }
+    }
+
+    private fun enableTestSession(
+        call: MethodCall,
+        result: Result
+    ) {
+        val token = call.argument<String>("token")
+        if (token.isNullOrEmpty()) {
+            result.error(
+                "INVALID_ARGUMENT",
+                "enableTestSession requires a non-empty 'token' argument.",
+                null
+            )
+            return
+        }
+
+        try {
+            // The underlying SDK only allows this to be called once per
+            // FirebasePhoneNumberVerification instance; subsequent calls throw.
+            fpnv.enableTestSession(token)
+            result.success(null)
+        } catch (e: Exception) {
+            result.error(
+                "ENABLE_TEST_SESSION_FAILED",
+                e.message ?: "Failed to enable Firebase PNV test session.",
+                null
+            )
         }
     }
 

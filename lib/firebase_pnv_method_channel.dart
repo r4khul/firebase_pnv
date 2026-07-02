@@ -10,6 +10,13 @@ class MethodChannelFirebasePnv extends FirebasePnvPlatform {
   final methodChannel = const MethodChannel('firebase_pnv');
 
   @override
+  Future<void> enableTestSession(String token) {
+    return methodChannel.invokeMethod<void>('enableTestSession', {
+      'token': token,
+    });
+  }
+
+  @override
   Future<bool> checkSupport() async {
     final supported = await methodChannel.invokeMethod<bool>('checkSupport');
     return supported ?? false;

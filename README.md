@@ -50,6 +50,29 @@ No setup required. Every method call resolves to a `PlatformException` with
 code `UNAVAILABLE`, so make sure your app checks `checkSupport()` (which
 safely returns `false` on iOS) before attempting verification.
 
+## Testing without a real SIM (test mode)
+
+Firebase PNV supports a test mode so you can build and test the entire flow
+on physical devices and emulators **without a billing account or a real
+SIM**:
+
+1. In the [Firebase console](https://console.firebase.google.com), go to
+   **Security > Phone Verification > Testing** and click **Generate token**.
+   (Requires the Firebase Phone Number Verification Admin IAM role.)
+2. In your app, call `enableTestSession` **once**, before any other
+   `firebase_pnv` call:
+
+   ```dart
+   await FirebasePnv().enableTestSession('COPIED_TOKEN_STRING');
+   ```
+3. While the test session is active, `getVerifiedPhoneNumber()` resolves to
+   a fake phone number (a valid country code followed by all zeros) instead
+   of contacting a real carrier.
+
+Test tokens expire after 7 days. Calling `enableTestSession` more than once
+throws a `PlatformException`. Remove this call entirely before shipping to
+production.
+
 ## Recommended architecture: PNV first, SMS fallback
 
 The recommended pattern is to **always attempt Firebase PNV first**, and
@@ -100,6 +123,10 @@ Future<void> verifyPhoneNumber(String phoneNumber) async {
 ```dart
 final firebasePnv = FirebasePnv();
 
+/// Enables a test session (development only). Call once, before any other
+/// firebase_pnv call. See "Testing without a real SIM" above.
+await firebasePnv.enableTestSession('COPIED_TOKEN_STRING');
+
 /// Consent-free check - use to decide whether to show a PNV button
 /// or go straight to SMS verification.
 bool supported = await firebasePnv.checkSupport();
@@ -117,25 +144,37 @@ directly as a sign-in credential. Instead, your Flutter app sends the token
 returned by `getVerifiedPhoneNumber()` to **your own backend**, which:
 
 1. Verifies the token's signature and claims against Firebase PNV's JWKS
-   endpoint.
+   endpoint (`https://fpnv.googleapis.com/v1beta/jwks`, `ES256`).
 2. Extracts the verified phone number from the token's `sub` claim.
 3. Uses the **Firebase Admin SDK** to mint a **custom auth token** for that
    user, which the client then exchanges for a real Firebase Auth session
    via `signInWithCustomToken()`.
 
+> Since this package uses Firebase PNV's unified `getVerifiedPhoneNumber()`
+> API (rather than manually driving Credential Manager yourself), you do
+> **not** need to generate/track nonces on the client - that's only required
+> if you implement the [custom digital-credential flow](https://firebase.google.com/docs/phone-number-verification/android/custom-flow).
+
 ```javascript
 // server.js - Node.js + Express + firebase-admin
+const express = require('express');
 const admin = require('firebase-admin');
 const { JwtVerifier } = require('aws-jwt-verify');
 
 admin.initializeApp();
 
-const FIREBASE_PROJECT_NUMBER = '123456789'; // Settings > General in console
+// Find your Firebase project number on Settings > General in the console.
+const FIREBASE_PROJECT_NUMBER = '123456789';
 const issuer = `https://fpnv.googleapis.com/projects/${FIREBASE_PROJECT_NUMBER}`;
 const audience = issuer;
 const jwksUri = 'https://fpnv.googleapis.com/v1beta/jwks';
 
+// Verifies: signature (ES256, via JWKS), issuer/audience match your
+// project, and that the token has not expired.
 const fpnvVerifier = JwtVerifier.create({ issuer, audience, jwksUri });
+
+const app = express();
+app.use(express.json());
 
 app.post('/exchangePnvToken', async (req, res) => {
   const { fpnvToken } = req.body;
@@ -145,14 +184,10 @@ app.post('/exchangePnvToken', async (req, res) => {
     // 1. Verify signature, issuer, audience, and expiry.
     const payload = await fpnvVerifier.verify(fpnvToken);
 
-    // 2. Verify the nonce you generated earlier hasn't been replayed
-    //    (see Firebase PNV's "custom flow" docs for nonce generation).
-    await testAndRemoveNonce(payload.nonce);
-
-    // 3. The verified phone number is the token's subject claim.
+    // 2. The verified phone number is the token's subject claim.
     const verifiedPhoneNumber = payload.sub;
 
-    // 4. Look up (or create) a Firebase user for this phone number, then
+    // 3. Look up (or create) a Firebase user for this phone number, then
     //    mint a custom auth token for it.
     const user = await admin.auth().getUserByPhoneNumber(verifiedPhoneNumber)
       .catch(() => admin.auth().createUser({ phoneNumber: verifiedPhoneNumber }));
@@ -161,9 +196,12 @@ app.post('/exchangePnvToken', async (req, res) => {
 
     return res.json({ customToken });
   } catch (e) {
+    // Signature, issuer/audience, or expiry check failed - reject the token.
     return res.sendStatus(400);
   }
 });
+
+app.listen(3000);
 ```
 
 Back on the client, sign in with the returned custom token:
@@ -172,6 +210,25 @@ Back on the client, sign in with the returned custom token:
 final customToken = await sendTokenToBackend(pnvToken);
 await FirebaseAuth.instance.signInWithCustomToken(customToken);
 ```
+
+## Going to production
+
+Test mode is great for prototyping, but before shipping you must:
+
+1. Remove the `enableTestSession(...)` call from your production build.
+2. Add your app's **SHA-256 fingerprint** under **Settings > General** in
+   the Firebase console.
+3. Upgrade your project to the **Blaze (pay-as-you-go)** billing plan.
+4. In Google Cloud Console > **APIs & Services > Credentials**, restrict your
+   Android API key to include the Firebase Phone Number Verification API. If
+   you use API restrictions, also allow-list `com.google.android.gms` with
+   SHA-1 `38918a453d07199354f8b19af05ec6562ced5788`, or you'll see
+   `PERMISSION_DENIED` errors in your logs.
+5. In the Firebase console, go to **Security > Phone Verification >
+   Production**, click **Upgrade to production**, and complete OAuth brand
+   verification (requires a publicly accessible privacy policy).
+
+Full details: [Upgrade to production mode](https://firebase.google.com/docs/phone-number-verification/android/production-mode).
 
 ## Example app
 
@@ -189,6 +246,8 @@ to evolve; please open an issue if Google changes method signatures.
 ## Links
 
 * [Firebase PNV overview](https://firebase.google.com/docs/phone-number-verification)
-* [Firebase PNV Android setup](https://firebase.google.com/docs/phone-number-verification/android/get-started)
+* [Get started with Firebase PNV on Android](https://firebase.google.com/docs/phone-number-verification/android/get-started)
 * [Customizing the PNV flow](https://firebase.google.com/docs/phone-number-verification/android/custom-flow)
+* [Upgrade to production mode](https://firebase.google.com/docs/phone-number-verification/android/production-mode)
+* [Verifying Firebase PNV tokens](https://firebase.google.com/docs/phone-number-verification/verify-tokens)
 * [Flutter plugin development](https://docs.flutter.dev/packages-and-plugins/developing-packages)

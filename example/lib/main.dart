@@ -70,9 +70,35 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _firebasePnv = FirebasePnv();
+  final _testTokenController = TextEditingController();
   _VerificationState _state = const _VerificationState();
+  String? _testSessionMessage;
 
   bool get _isLoading => _state.step == _VerificationStep.loading;
+
+  @override
+  void dispose() {
+    _testTokenController.dispose();
+    super.dispose();
+  }
+
+  /// Dev-only helper: enables a Firebase PNV test session using a token
+  /// generated from the Firebase console, so the flow can be exercised
+  /// without a real SIM or billing account. Must be called once, before
+  /// [checkSupport]/[getVerifiedPhoneNumber].
+  Future<void> _enableTestSession() async {
+    final token = _testTokenController.text.trim();
+    if (token.isEmpty) return;
+
+    try {
+      await _firebasePnv.enableTestSession(token);
+      if (!mounted) return;
+      setState(() => _testSessionMessage = 'Test session enabled.');
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      setState(() => _testSessionMessage = e.message ?? e.code);
+    }
+  }
 
   /// Runs the recommended PNV flow:
   /// 1. checkSupport() - cheap, consent-free capability check.
@@ -127,6 +153,9 @@ class _MyAppState extends State<MyApp> {
         state: _state,
         isLoading: _isLoading,
         onVerifyPressed: _startVerification,
+        testTokenController: _testTokenController,
+        testSessionMessage: _testSessionMessage,
+        onEnableTestSession: _enableTestSession,
       ),
     );
   }
@@ -141,11 +170,17 @@ class _HomeScreen extends StatelessWidget {
     required this.state,
     required this.isLoading,
     required this.onVerifyPressed,
+    required this.testTokenController,
+    required this.testSessionMessage,
+    required this.onEnableTestSession,
   });
 
   final _VerificationState state;
   final bool isLoading;
   final VoidCallback onVerifyPressed;
+  final TextEditingController testTokenController;
+  final String? testSessionMessage;
+  final VoidCallback onEnableTestSession;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +194,12 @@ class _HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const _HeaderBanner(),
+                  const SizedBox(height: 20),
+                  _TestSessionPanel(
+                    controller: testTokenController,
+                    message: testSessionMessage,
+                    onEnable: onEnableTestSession,
+                  ),
                   const SizedBox(height: 24),
                   _VerifyButton(onPressed: isLoading ? null : onVerifyPressed),
                   const SizedBox(height: 24),
@@ -223,6 +264,92 @@ class _HeaderBanner extends StatelessWidget {
               color: _NeoStyle.ink,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dev-only panel to paste a Firebase console-generated test token and call
+/// [FirebasePnv.enableTestSession], so the flow can be exercised without a
+/// real SIM or billing account. See the README's "Testing without a real
+/// SIM" section.
+class _TestSessionPanel extends StatelessWidget {
+  const _TestSessionPanel({
+    required this.controller,
+    required this.message,
+    required this.onEnable,
+  });
+
+  final TextEditingController controller;
+  final String? message;
+  final VoidCallback onEnable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: _NeoStyle.block(
+        borderWidth: 2,
+        shadowOffset: const Offset(3, 3),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'DEV: TEST SESSION TOKEN',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              color: _NeoStyle.ink,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  style: const TextStyle(fontSize: 12, color: _NeoStyle.ink),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    border: OutlineInputBorder(),
+                    hintText: 'Paste console token',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onEnable,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: _NeoStyle.block(
+                    color: _NeoStyle.yellow,
+                    borderWidth: 2,
+                    shadowOffset: const Offset(2, 2),
+                  ),
+                  child: const Text(
+                    'ENABLE',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: _NeoStyle.ink,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              message!,
+              style: const TextStyle(fontSize: 11, color: _NeoStyle.ink),
+            ),
+          ],
         ],
       ),
     );

@@ -8,6 +8,9 @@ class MockFirebasePnvPlatform
     with MockPlatformInterfaceMixin
     implements FirebasePnvPlatform {
   @override
+  Future<void> enableTestSession(String token) => Future.value();
+
+  @override
   Future<bool> checkSupport() => Future.value(true);
 
   @override

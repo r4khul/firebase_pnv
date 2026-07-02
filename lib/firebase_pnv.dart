@@ -21,6 +21,22 @@ import 'firebase_pnv_platform_interface.dart';
 /// call [checkSupport] on any platform and simply fall back to SMS-based
 /// verification (e.g. `firebase_auth`) when it returns `false` or throws.
 class FirebasePnv {
+  /// Enables a Firebase PNV test session for development/testing without a
+  /// billing account or a real SIM.
+  ///
+  /// Generate a [token] from the Firebase console under
+  /// **Security > Phone Verification > Testing**, then call this once,
+  /// before any other `firebase_pnv` call. While a test session is active,
+  /// [getVerifiedPhoneNumber] resolves to a fake phone number (a valid
+  /// country code followed by all zeros) instead of hitting a real carrier.
+  /// Test tokens expire after 7 days.
+  ///
+  /// Throws a [PlatformException] if called more than once per app process,
+  /// or on iOS, where PNV is unavailable.
+  Future<void> enableTestSession(String token) {
+    return FirebasePnvPlatform.instance.enableTestSession(token);
+  }
+
   /// Checks whether the current device/SIM combination supports Firebase
   /// Phone Number Verification.
   ///

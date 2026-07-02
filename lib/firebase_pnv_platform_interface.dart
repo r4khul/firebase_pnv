@@ -30,6 +30,22 @@ abstract class FirebasePnvPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// Enables a Firebase PNV test session using a token generated from the
+  /// Firebase console's Security > Phone Verification > Testing tab.
+  ///
+  /// Test sessions let you develop and test the full PNV flow on physical
+  /// devices and emulators, without a billing account and without a real
+  /// SIM - `getVerifiedPhoneNumber` will resolve to a fake phone number
+  /// consisting of a valid country code followed by all zeros. Test tokens
+  /// expire after 7 days.
+  ///
+  /// This must be called only once per app process, before any other
+  /// Firebase PNV call; the native SDK throws if called more than once on
+  /// the same underlying instance.
+  Future<void> enableTestSession(String token) {
+    throw UnimplementedError('enableTestSession() has not been implemented.');
+  }
+
   /// Checks whether the current device and SIM card(s) support Firebase
   /// Phone Number Verification (PNV).
   ///
