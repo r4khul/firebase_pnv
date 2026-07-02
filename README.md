@@ -36,7 +36,7 @@ dependencies:
 
 1. Add Firebase to your Android app if you haven't already ([guide](https://firebase.google.com/docs/android/setup)).
 2. In the [Firebase console](https://console.firebase.google.com), enable Phone Number Verification for your project.
-3. `minSdkVersion` must be `21` or higher.
+3. `minSdkVersion` must be `24` or higher.
 4. This package's `android/build.gradle.kts` already declares:
    ```kotlin
    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
