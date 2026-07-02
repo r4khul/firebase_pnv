@@ -50,6 +50,55 @@ No setup required. Every method call resolves to a `PlatformException` with
 code `UNAVAILABLE`, so make sure your app checks `checkSupport()` (which
 safely returns `false` on iOS) before attempting verification.
 
+## Usage
+
+This is all you need to start using the package in your app.
+
+**1. Import it and create an instance** (one instance is enough for your
+whole app - you can reuse it anywhere):
+
+```dart
+import 'package:firebase_pnv/firebase_pnv.dart';
+
+final firebasePnv = FirebasePnv();
+```
+
+**2. Check if the device supports it.** Call this first, every time, before
+trying to verify anything:
+
+```dart
+bool isSupported = await firebasePnv.checkSupport();
+```
+- Returns `true` → device/SIM can use Firebase PNV, safe to continue.
+- Returns `false` → not supported (or you're on iOS) - show your normal SMS
+  verification instead.
+
+**3. If supported, verify the phone number.** This is the only method that
+shows UI - it pops up the native consent sheet:
+
+```dart
+Map<String, dynamic>? result = await firebasePnv.getVerifiedPhoneNumber();
+
+String? phoneNumber = result?['phoneNumber']; // e.g. "+14155550123"
+String? token = result?['token'];             // send this to your backend
+```
+- If the user taps "Allow", you get back the `phoneNumber` and a `token`.
+- If the user declines, or something goes wrong, it throws a
+  `PlatformException` - always wrap the call in `try`/`catch`.
+
+**4. Send the `token` to your backend.** Your app never needs to look inside
+the token - just forward it as-is. Your backend verifies it and gives you
+back a Firebase custom auth token, which you use to sign the user in (see
+[Backend integration](#backend-integration) below for the full backend code).
+
+That's really the whole public API - three methods total:
+
+| Method | What it does | When to call it |
+|---|---|---|
+| `checkSupport()` | Checks if the device/SIM can use PNV. No UI, no consent needed. | Every time, before verifying. |
+| `getVerifiedPhoneNumber()` | Shows the consent sheet and verifies the number via carrier. | Only after `checkSupport()` returns `true`. |
+| `enableTestSession(token)` | Switches to test mode (fake phone number, no real SIM needed). | Optional - only during development. See below. |
+
 ## Testing without a real SIM (test mode)
 
 Firebase PNV supports a test mode so you can build and test the entire flow
