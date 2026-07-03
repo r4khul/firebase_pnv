@@ -15,7 +15,7 @@
 
 ---
 
-## ⚡ What is Firebase PNV (and How It Differs)?
+## What is Firebase PNV
 
 This package is **NOT** the traditional, SMS-based Firebase Phone Authentication (`firebase_auth`). Instead, it is a modern, carrier-integrated verification flow:
 
@@ -36,7 +36,7 @@ This package is **NOT** the traditional, SMS-based Firebase Phone Authentication
 
 ---
 
-## 📱 Platform Support & iOS Stubs
+## Platform Support
 
 * **Android:** Full implementation. Requires **Google Play Services** on the device. It integrates with Android's **Credential Manager** to present the native consent dialog.
 * **iOS / macOS / Windows / Linux / Web:** Firebase Phone Number Verification is a native Android-only SDK provided by Google. To ensure your multiplatform Flutter apps build and run without breaking, this package includes **safe platform stubs**.
@@ -46,19 +46,9 @@ This package is **NOT** the traditional, SMS-based Firebase Phone Authentication
 
 ---
 
-## 📸 Screenshots
+## How to Use This Package
 
-Here is the native Credential Manager consent sheet and the carrier verification flow on an Android device:
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/carrier-verification.jpg" width="45%" alt="Carrier Verification Consent Sheet" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/auth-token-generate.jpg" width="45%" alt="Auth Token Generation" />
-</p>
-
----
-
-## 🛠️ Installation & Setup
+### Installation
 
 Add `firebase_pnv` to your `pubspec.yaml`:
 
@@ -67,7 +57,7 @@ dependencies:
   firebase_pnv: ^1.0.1
 ```
 
-### Android Configuration
+### Android Setup
 
 1. **Add Firebase to Android:** Add Firebase to your Android project if you haven't already ([Firebase Setup Guide](https://firebase.google.com/docs/android/setup)).
 2. **Enable PNV:** Go to the [Firebase Console](https://console.firebase.google.com), open your project, and enable Phone Number Verification under your Auth settings.
@@ -80,13 +70,21 @@ dependencies:
      ```
      No additional dependencies are needed in your app-level `build.gradle`.
 
-### iOS Configuration
+### iOS Setup
 
 No setup is required. The package provides a stub that allows iOS compilations to complete normally. Ensure you use `checkSupport()` before invoking PNV methods to provide a clean SMS fallback for your iOS users.
 
----
+### Screenshots
 
-## 🚀 Key Features & Usage Flow
+Here is the native Credential Manager consent sheet and the carrier verification flow on an Android device:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/carrier-verification.jpg" width="45%" alt="Carrier Verification Consent Sheet" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/auth-token-generate.jpg" width="45%" alt="Auth Token Generation" />
+</p>
+
+### Integration Flow
 
 The usage flow of Firebase PNV consists of 5 core steps:
 
@@ -100,47 +98,7 @@ graph TD
     D --> E[Sign in via Custom Token]
 ```
 
-### 1. Checking Device & Carrier Support
-Call `checkSupport()` to check if the device, SIM card, and network carrier support Firebase PNV. Under the hood, this queries the native SDK's `getVerificationSupportInfo()` method.
-```dart
-import 'package:firebase_pnv/firebase_pnv.dart';
-
-final _firebasePnv = FirebasePnv();
-
-// Quick, consent-free pre-check
-bool isSupported = await _firebasePnv.checkSupport();
-```
-* **Returns `true`:** The SIM and device support carrier lookup. You can proceed with showing the PNV button or sheet.
-* **Returns `false`:** Either the platform is iOS/Web, or the device/carrier is unsupported. Route the user directly to standard SMS verification.
-
-### 2. Triggering the Native Google Consent Sheet
-If supported, invoke `getVerifiedPhoneNumber()`. This triggers Android's Credential Manager bottom sheet, asking the user for permission to share their verified phone number.
-```dart
-try {
-  Map<String, dynamic>? result = await _firebasePnv.getVerifiedPhoneNumber();
-  // Proceed to Step 3
-} on PlatformException catch (e) {
-  // User declined, closed the dialog, or a network/carrier lookup error occurred.
-  // Cleanly fall back to SMS Auth.
-}
-```
-
-### 3. Getting the Carrier-Verified Token
-If the user grants permission, the system verifies the phone number directly with the carrier and returns a payload:
-```dart
-String? phoneNumber = result?['phoneNumber']; // E.g., "+14155550123"
-String? token = result?['token'];             // Opaque JWT verified token
-```
-
-### 4. Exchanging the Token on the Backend
-Your Flutter app sends the `token` (JWT) to your secure backend server. Your backend verifies the token using the Google/Firebase PNV JWKS endpoint, extracts the verified phone number, and mints a Firebase Custom Token via the Firebase Admin SDK.
-
-### 5. Fallback to Standard SMS Auth
-If `checkSupport()` returns false, or if `getVerifiedPhoneNumber()` fails (e.g. because the user cancelled the dialog), fall back gracefully to traditional SMS verification.
-
----
-
-## 💻 Code Implementation
+### Code Implementation
 
 Here is how to combine PNV and SMS fallbacks in a single cohesive flow:
 
@@ -191,9 +149,7 @@ Future<void> startAuthentication(String phoneNumberInput) async {
 }
 ```
 
----
-
-## 🖥️ Backend Token Exchange
+### Backend Token Exchange
 
 Firebase Auth does not accept PNV carrier tokens directly on the client. You must exchange them on your backend.
 
@@ -253,36 +209,80 @@ app.listen(3000, () => console.log('Auth backend listening on port 3000'));
 
 ---
 
-## 🧪 Testing Without a Physical SIM (Test Mode)
+## API Reference
 
-Firebase PNV supports a test mode so you can simulate carrier lookups on emulators or test devices without a real SIM card:
+Here is a showcase of the classes and methods available in the `firebase_pnv` package.
 
-1. **Generate Test Token:** Go to the [Firebase Console](https://console.firebase.google.com) -> **Security** -> **Phone Verification** -> **Testing**, and generate a verification token.
-2. **Enable Session:** Call `enableTestSession()` once in your app initialization before invoking any other PNV methods:
-   ```dart
-   if (kDebugMode) {
-     await _firebasePnv.enableTestSession('YOUR_GENERATED_TEST_TOKEN');
-   }
-   ```
-3. **Simulated Output:** When the test session is active, `getVerifiedPhoneNumber()` will immediately resolve with a fake test phone number (e.g. `+10000000000`) instead of checking a real mobile carrier.
+### FirebasePnv Class
 
-> [!WARNING]
-> Test tokens expire after 7 days. Ensure that `enableTestSession` is completely removed or conditionally compiled out (e.g. via `kDebugMode`) in production releases.
+The main class to interact with the Firebase Phone Number Verification SDK.
+
+#### `checkSupport()`
+
+Checks whether the current device, SIM card, and network carrier support Firebase Phone Number Verification.
+
+* **Type:** `Future<bool>`
+* **Returns:** `true` if the carrier lookup is supported on this device/SIM combination. Returns `false` on unsupported devices, unsupported network carriers, or non-Android platforms (e.g. iOS, Web).
+* **Usage:**
+  ```dart
+  final _firebasePnv = FirebasePnv();
+  bool isSupported = await _firebasePnv.checkSupport();
+  ```
+
+#### `getVerifiedPhoneNumber()`
+
+Runs the full verification flow. On Android, this triggers the Credential Manager consent bottom sheet. If the user consents, the library verifies the phone number directly with the mobile carrier in the background.
+
+* **Type:** `Future<Map<String, dynamic>?>`
+* **Returns:** `null` if the native platform returned no result, or a map containing:
+  * `phoneNumber`: The verified E.164 phone number.
+  * `token`: The carrier-signed verification token (JWT) to send to your backend for verification.
+* **Throws:** `PlatformException` if the user cancels, if the device/carrier is unsupported, or if it runs on a non-Android platform.
+* **Usage:**
+  ```dart
+  try {
+    final result = await _firebasePnv.getVerifiedPhoneNumber();
+    if (result != null) {
+      String? phoneNumber = result['phoneNumber'];
+      String? token = result['token'];
+    }
+  } on PlatformException catch (e) {
+    // Handle error or user cancellation, and fall back to SMS
+  }
+  ```
+
+#### `enableTestSession(String token)`
+
+Enables a mock test session for testing carrier-based verification locally or on emulators.
+
+* **Type:** `Future<void>`
+* **Parameters:** `token` (String) - The verification token generated from the Firebase Console (under Security > Phone Verification > Testing).
+* **Behavior:** When active, `getVerifiedPhoneNumber()` resolves to a simulated test phone number (e.g., `+10000000000`) instead of contacting a real mobile carrier.
+* **Usage:**
+  ```dart
+  if (kDebugMode) {
+    await _firebasePnv.enableTestSession('YOUR_GENERATED_TEST_TOKEN');
+  }
+  ```
+  > [!WARNING]
+  > Test tokens expire after 7 days. Ensure this is only called in development/test environments.
 
 ---
 
-## 🚀 Moving to Production Checklist
+## Production Checklist
 
-Before shipping your application:
+Before shipping your application to production:
+
 1. **Disable Test Sessions:** Ensure no active `enableTestSession` code runs in production.
 2. **Set SHA-256 Fingerprint:** Register your production SHA-256 app certificate in the Firebase Console.
-3. **Upgrade Firebase Plan:** Upgrade to the Blaze plan (pay-as-you-go).
-4. **Restrict API Keys:** Under Google Cloud Console -> APIs & Services, restrict your Android API key to include the `Firebase Phone Number Verification API`. Allow-list `com.google.android.gms` with SHA-1 `38918a453d07199354f8b19af05ec6562ced5788` to avoid `PERMISSION_DENIED` errors.
-5. **Complete Brand OAuth Verification:** Go to **Security** -> **Phone Verification** -> **Production** and complete OAuth configuration (requires a privacy policy link).
+3. **Upgrade Firebase Plan:** Upgrade your project to the Blaze plan (pay-as-you-go).
+4. **Restrict API Keys:** In the Google Cloud Console (APIs & Services), restrict your Android API key to include the `Firebase Phone Number Verification API`. Allow-list `com.google.android.gms` with SHA-1 `38918a453d07199354f8b19af05ec6562ced5788` to avoid `PERMISSION_DENIED` errors.
+5. **Complete Brand OAuth Verification:** Go to Security -> Phone Verification -> Production in the Firebase Console and complete the OAuth configuration (requires a privacy policy link).
 
 ---
 
-## 🔗 Useful Links
+## Useful Links
+
 * [Official Firebase PNV Documentation](https://firebase.google.com/docs/phone-number-verification)
 * [Get Started with PNV on Android](https://firebase.google.com/docs/phone-number-verification/android/get-started)
 * [Verifying Firebase PNV Tokens on Backend](https://firebase.google.com/docs/phone-number-verification/verify-tokens)
