@@ -1,4 +1,4 @@
-## 1.0.0+2
+## 1.0.1
 
 * Fix relative image links in README.md by using absolute GitHub raw URLs for pub.dev compatibility.
 
