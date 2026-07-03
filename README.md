@@ -1,7 +1,7 @@
 # firebase_pnv
 
 <p align="center">
-  <img src="banner/firebase_pnv.png" alt="firebase_pnv Banner" width="100%">
+  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/firebase_pnv.png" alt="firebase_pnv Banner" width="100%">
 </p>
 
 <p align="center">
@@ -42,9 +42,9 @@ every platform and simply fall back to SMS when it's unavailable.
 Here is how the native consent sheet and carrier verification flow look on an Android device (Realme C67 5G):
 
 <p align="center">
-  <img src="banner/carrier-verification.jpg" width="45%" alt="Carrier Verification Consent Sheet" />
+  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/carrier-verification.jpg" width="45%" alt="Carrier Verification Consent Sheet" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="banner/auth-token-generate.jpg" width="45%" alt="Auth Token Generation" />
+  <img src="https://raw.githubusercontent.com/r4khul/firebase_pnv/main/banner/auth-token-generate.jpg" width="45%" alt="Auth Token Generation" />
 </p>
 
 ## Installation
