@@ -4,6 +4,14 @@
   <img src="banner/firebase_pnv.png" alt="firebase_pnv Banner" width="100%">
 </p>
 
+<p align="center">
+  <a href="https://pub.dev/packages/firebase_pnv"><img src="https://img.shields.io/pub/v/firebase_pnv?label=pub.dev&labelColor=0F172A&logo=dart&logoColor=fff&color=0EA5E9&style=flat" alt="pub"></a>
+  <a href="https://github.com/r4khul/firebase_pnv"><img src="https://img.shields.io/github/stars/r4khul/firebase_pnv?style=flat&label=stars&labelColor=0F172A&color=8B5CF6&logo=github&logoColor=fff" alt="github"></a>
+  <a href="https://github.com/r4khul/firebase_pnv/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/r4khul/firebase_pnv/ci.yml?branch=main&label=build&labelColor=0F172A&color=22C55E&logo=github&logoColor=fff&style=flat" alt="build"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-F97316.svg?labelColor=0F172A&style=flat" alt="license"></a>
+</p>
+
+
 **Verify a phone number without ever sending an SMS.**
 
 `firebase_pnv` is an unofficial Flutter bridge to Google's **Firebase Phone
