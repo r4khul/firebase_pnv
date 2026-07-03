@@ -1,6 +1,6 @@
 name: firebase_pnv
 description: "Flutter bridge for Firebase Phone Number Verification (PNV) - carrier-based, SMS-free phone verification for Android via Credential Manager."
-version: 1.0.0+1
+version: 1.0.0+2
 homepage: https://github.com/r4khul/firebase_pnv
 repository: https://github.com/r4khul/firebase_pnv
 issue_tracker: https://github.com/r4khul/firebase_pnv/issues
