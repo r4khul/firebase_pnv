@@ -1,5 +1,9 @@
 # firebase_pnv
 
+<p align="center">
+  <img src="banner/firebase_pnv.png" alt="firebase_pnv Banner" width="100%">
+</p>
+
 **Verify a phone number without ever sending an SMS.**
 
 `firebase_pnv` is an unofficial Flutter bridge to Google's **Firebase Phone
@@ -24,6 +28,16 @@ fraud**, where attackers repeatedly trigger your SMS verification endpoint
 with junk numbers to rack up your SMS bill. It's currently **Android-only**;
 this package ships a safe iOS stub so your shared Dart code can call it on
 every platform and simply fall back to SMS when it's unavailable.
+
+## Screenshots
+
+Here is how the native consent sheet and carrier verification flow look on an Android device (Realme C67 5G):
+
+<p align="center">
+  <img src="banner/carrier-verification.jpg" width="45%" alt="Carrier Verification Consent Sheet" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="banner/auth-token-generate.jpg" width="45%" alt="Auth Token Generation" />
+</p>
 
 ## Installation
 
