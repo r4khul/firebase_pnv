@@ -2,6 +2,9 @@ import 'package:flutter/services.dart';
 
 import 'firebase_pnv_platform_interface.dart';
 
+export 'firebase_pnv_stubs.dart';
+
+
 /// Public Dart API for the `firebase_pnv` plugin.
 ///
 /// Firebase Phone Number Verification (PNV) is fundamentally different from

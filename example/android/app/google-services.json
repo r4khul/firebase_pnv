@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "874198701585",
+    "project_id": "firebasepnv",
+    "storage_bucket": "firebasepnv.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874198701585:android:59e6cd4b799c1842d343b0",
+        "android_client_info": {
+          "package_name": "com.escapebranch.firebase_pnv_example"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARsi6ccivtT8M-Gz0liwEdzQlc6vqql24"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

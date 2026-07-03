@@ -1,9 +1,13 @@
 name: firebase_pnv
 description: "Flutter bridge for Firebase Phone Number Verification (PNV) - carrier-based, SMS-free phone verification for Android via Credential Manager."
 version: 0.0.1
-homepage: https://github.com/escapebranch/firebase_pnv
-repository: https://github.com/escapebranch/firebase_pnv
-issue_tracker: https://github.com/escapebranch/firebase_pnv/issues
+homepage: https://github.com/r4khul/firebase_pnv
+repository: https://github.com/r4khul/firebase_pnv
+issue_tracker: https://github.com/r4khul/firebase_pnv/issues
+
+false_secrets:
+  - "example/lib/firebase_options.dart"
+  - "example/android/app/google-services.json"
 
 environment:
   sdk: ^3.11.1
@@ -11,6 +15,8 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
 
@@ -41,6 +47,15 @@ flutter:
         pluginClass: FirebasePnvPlugin
       ios:
         pluginClass: FirebasePnvPlugin
+      macos:
+        dartPluginClass: FirebasePnvMacOs
+      windows:
+        dartPluginClass: FirebasePnvWindows
+      linux:
+        dartPluginClass: FirebasePnvLinux
+      web:
+        fileName: firebase_pnv_web.dart
+        pluginClass: FirebasePnvWeb
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
