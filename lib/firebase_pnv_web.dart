@@ -13,7 +13,8 @@ class FirebasePnvWeb extends FirebasePnvPlatform {
   Future<void> enableTestSession(String token) {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on Web.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on Web.',
     );
   }
 
@@ -26,7 +27,8 @@ class FirebasePnvWeb extends FirebasePnvPlatform {
   Future<Map<String, dynamic>?> getVerifiedPhoneNumber() {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on Web.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on Web.',
     );
   }
 }

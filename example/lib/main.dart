@@ -29,13 +29,7 @@ class _NeoStyle {
     return BoxDecoration(
       color: color,
       border: Border.all(color: ink, width: borderWidth),
-      boxShadow: [
-        BoxShadow(
-          color: ink,
-          offset: shadowOffset,
-          blurRadius: 0,
-        ),
-      ],
+      boxShadow: [BoxShadow(color: ink, offset: shadowOffset, blurRadius: 0)],
     );
   }
 }
@@ -107,14 +101,18 @@ class _MyAppState extends State<MyApp> {
   /// 3. If unsupported, surface a banner telling the caller to fall back to
   ///    SMS-based verification (e.g. firebase_auth).
   Future<void> _startVerification() async {
-    setState(() => _state = const _VerificationState(step: _VerificationStep.loading));
+    setState(
+      () => _state = const _VerificationState(step: _VerificationStep.loading),
+    );
 
     final bool supported = await _firebasePnv.checkSupport();
     if (!mounted) return;
 
     if (!supported) {
       setState(
-        () => _state = const _VerificationState(step: _VerificationStep.unsupported),
+        () => _state = const _VerificationState(
+          step: _VerificationStep.unsupported,
+        ),
       );
       return;
     }
@@ -437,9 +435,9 @@ class _ResultBlock extends StatelessWidget {
 
   void _copy(BuildContext context, String label, String value) {
     Clipboard.setData(ClipboardData(text: value));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label copied to clipboard')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$label copied to clipboard')));
   }
 
   @override

@@ -12,7 +12,8 @@ class FirebasePnvMacOs extends FirebasePnvPlatform {
   Future<void> enableTestSession(String token) {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on macOS.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on macOS.',
     );
   }
 
@@ -25,7 +26,8 @@ class FirebasePnvMacOs extends FirebasePnvPlatform {
   Future<Map<String, dynamic>?> getVerifiedPhoneNumber() {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on macOS.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on macOS.',
     );
   }
 }
@@ -41,7 +43,8 @@ class FirebasePnvWindows extends FirebasePnvPlatform {
   Future<void> enableTestSession(String token) {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on Windows.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on Windows.',
     );
   }
 
@@ -54,7 +57,8 @@ class FirebasePnvWindows extends FirebasePnvPlatform {
   Future<Map<String, dynamic>?> getVerifiedPhoneNumber() {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on Windows.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on Windows.',
     );
   }
 }
@@ -70,7 +74,8 @@ class FirebasePnvLinux extends FirebasePnvPlatform {
   Future<void> enableTestSession(String token) {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on Linux.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on Linux.',
     );
   }
 
@@ -83,7 +88,8 @@ class FirebasePnvLinux extends FirebasePnvPlatform {
   Future<Map<String, dynamic>?> getVerifiedPhoneNumber() {
     throw PlatformException(
       code: 'UNAVAILABLE',
-      message: 'Firebase Phone Number Verification (PNV) is not supported on Linux.',
+      message:
+          'Firebase Phone Number Verification (PNV) is not supported on Linux.',
     );
   }
 }
